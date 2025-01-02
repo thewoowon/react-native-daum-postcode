@@ -1,0 +1,9 @@
+node_modules
+example/
+tests/
+src/
+*.config.js
+*.log
+.eslint*
+.prettier*
+babel.config.js
