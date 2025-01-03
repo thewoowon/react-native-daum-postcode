@@ -1,1 +1,12 @@
-node_modules
+.DS_Store
+
+/node_modules
+/dist
+/lib
+/modules
+/bin
+
+.idea
+.watchmanconfig
+package-lock.json
+.next
