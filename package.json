@@ -2,15 +2,18 @@
   "name": "react-native-daum-postcode",
   "version": "1.0.0",
   "description": "The fastest way to use Kakao Daum Postcode API in React Native",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "build:src": "rm -rf ./dist && tsc -p tsconfig.json && [ -d ./dist ] && npx babel dist --out-dir dist || echo 'TypeScript compilation failed!'",
     "start": "node index.js",
     "build": "tsc",
     "test": "jest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
-    "prepare": "husky install"
+    "prepublishOnly": "npm run build",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -39,6 +42,7 @@
     "react-native": "^0.76.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.26.4",
     "@babel/core": "^7.26.0",
     "@babel/plugin-transform-runtime": "^7.25.9",
     "@babel/preset-env": "^7.26.0",
@@ -64,8 +68,6 @@
     "npm": ">=6.0.0"
   },
   "files": [
-    "index.js",
-    "src/",
     "dist/",
     "README.md",
     "LICENSE"
