@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../dist",
+    "rootDir": "../src",
+    "baseUrl": "./",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "lib": ["dom", "es2017"],
+    "jsx": "react-native"
+  }
+}
