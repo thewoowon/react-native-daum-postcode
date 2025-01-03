@@ -1,6 +1,8 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
     "target": "ES6",
     "module": "ESNext",
     "jsx": "react-native",
@@ -12,7 +14,6 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"]
@@ -21,5 +22,5 @@
     "importHelpers": true
   },
   "include": ["src/**/*", "@types"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist"]
 }
