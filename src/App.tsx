@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { Linking, View } from 'react-native';
 import WebView from 'react-native-webview';
+import { ShouldStartLoadRequest } from 'react-native-webview/lib/WebViewTypes';
 
 import { PostcodeProps } from './types';
 
@@ -88,7 +89,7 @@ const Postcode = (props: PostcodeProps) => {
         source={{ html, baseUrl: 'https://postcode.map.daum.net' }}
         onMessage={onMessage}
         injectedJavaScript={injectedJavaScript}
-        onShouldStartLoadWithRequest={(request) => {
+        onShouldStartLoadWithRequest={(request: ShouldStartLoadRequest) => {
           const isPostcode =
             !request.url?.startsWith('https://postcode.map.daum.net/guide') &&
             (!request.url?.startsWith('http') ||
