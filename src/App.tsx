@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Linking, View } from 'react-native';
 import WebView from 'react-native-webview';
 import { ShouldStartLoadRequest } from 'react-native-webview/lib/WebViewTypes';
@@ -9,99 +9,93 @@ const html = `
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
-	<style> 
-	  * { box-sizing: border-box }
-	  html, body { width: 100%; height: 100%; margin:0px; padding: 0px; background-color: #ececec; } 
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <style> 
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; padding: 0; background-color: #ececec; }
   </style>
 </head>
 <body>
-	<div id="layer" style="width:100%; min-height: 100%;"></div>
-	<script type="text/javascript">
-    function callback() {
-			var element_layer = document.getElementById('layer');
-			element_layer.innerHTML = "";
-      new daum.Postcode({
-        ...window.options,
-        onsearch: function () {
-          window.scrollTo(0, 0);
-        },
-        oncomplete: function(data) {
-          window.ReactNativeWebView.postMessage(JSON.stringify(data));
-        },
-        onresize: function(size) {
-          document.getElementById('layer').style.height = size.height + 'px';
-        },
-        onclose: function() {
-          callback();
-        },
-        width : '100%',
-        height: '100%',
-      }).embed(element_layer);
+  <div id="layer" style="width:100%; height:100%;"></div>
+  <script type="text/javascript">
+    function initPostcode(options) {
+      window.options = options;
+      var script = document.createElement('script');
+      script.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+      script.onload = () => {
+        new daum.Postcode({
+          ...window.options,
+          oncomplete: (data) => {
+            window.ReactNativeWebView.postMessage(JSON.stringify(data));
+          }
+        }).embed(document.getElementById('layer'));
+      };
+      document.head.appendChild(script);
     }
-		function initOnReady(options) {
-    	window.options = options;
-			var s = document.createElement('script');
-			s.type = 'text/javascript'; s.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
-			s.onreadystatechange = callback; s.onload = callback;
-			var x = document.getElementsByTagName('script')[0]; x.parentNode.insertBefore(s, x);
-    }
-	</script>
+  </script>
 </body>
-</html>
-`;
+</html>`;
 
-const Postcode = (props: PostcodeProps) => {
-  const { jsOptions, onSelected, onError, style, ...otherProps } = props;
+const Postcode = ({
+  jsOptions,
+  onSelected,
+  onError,
+  style,
+  ...otherProps
+}: PostcodeProps) => {
+  const [shouldStartLoad, setShouldStartLoad] = useState(true);
+
   const injectedJavaScript = useMemo(
-    () => `initOnReady(${JSON.stringify(jsOptions)});void(0);`,
+    () => `initPostcode(${JSON.stringify(jsOptions)});`,
     [jsOptions]
   );
 
   const onMessage = useCallback(
-    ({
-      nativeEvent,
-    }: {
-      nativeEvent: {
-        data: string;
-      };
-    }) => {
+    ({ nativeEvent: { data } }: { nativeEvent: { data: string } }) => {
       try {
-        nativeEvent.data &&
-          onSelected &&
-          onSelected(JSON.parse(nativeEvent.data));
-      } catch (e) {
-        onError(e);
+        if (data) {
+          onSelected?.(JSON.parse(data));
+        }
+      } catch (error) {
+        console.error('Error parsing postcode data:', error);
+        onError?.(error);
       }
     },
-    [onSelected]
+    [onSelected, onError]
+  );
+
+  const onShouldStartLoadWithRequest = useCallback(
+    (request: ShouldStartLoadRequest) => {
+      if (request.url === 'about:blank') {
+        return false;
+      }
+
+      const allowedUrls = [
+        'https://postcode.map.daum.net',
+        'http://postcode.map.daum.net',
+      ];
+
+      if (allowedUrls.some((url) => request.url.startsWith(url))) {
+        return true;
+      }
+
+      Linking.openURL(request.url).catch((error) =>
+        console.error('Failed to open URL:', error)
+      );
+      return false;
+    },
+    []
   );
 
   return (
     <View style={style}>
       <WebView
-        mixedContentMode={'compatibility'}
-        androidLayerType="hardware"
-        renderToHardwareTextureAndroid={true}
-        useWebKit={true}
-        {...otherProps}
         source={{ html, baseUrl: 'https://postcode.map.daum.net' }}
         onMessage={onMessage}
         injectedJavaScript={injectedJavaScript}
-        onShouldStartLoadWithRequest={(request: ShouldStartLoadRequest) => {
-          const isPostcode =
-            !request.url?.startsWith('https://postcode.map.daum.net/guide') &&
-            (!request.url?.startsWith('http') ||
-              request.url?.startsWith('https://postcode.map.daum.net') ||
-              request.url?.startsWith('http://postcode.map.daum.net'));
-          if (!isPostcode) {
-            Linking.openURL(request.url);
-            return false;
-          } else {
-            return true;
-          }
-        }}
+        onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
+        {...otherProps}
       />
     </View>
   );
