@@ -1,5 +1,5 @@
 {
-  "name": "react-native-daum-postcode",
+  "name": "@thewoowon/react-native-daum-postcode",
   "version": "1.0.0",
   "description": "The fastest way to use Kakao Daum Postcode API in React Native",
   "main": "dist/index.js",
