@@ -26,6 +26,11 @@ or using yarn:
 yarn add @thewoowon/react-native-daum-postcode
 ```
 
+and iOS requires pod install because of react-native-webview.
+
+```bash
+cd ios && pod install
+```
 ---
 
 ## 🛠️ Usage
