@@ -9,6 +9,7 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "declaration": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
@@ -21,6 +22,6 @@
     "typeRoots": ["./node_modules/@types", "./@types"],
     "importHelpers": true
   },
-  "include": ["src/**/*", "@types"],
+  "include": ["src/**/*", "src/types.ts", "@types"],
   "exclude": ["node_modules", "dist"]
 }
